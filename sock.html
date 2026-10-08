@@ -1,935 +1,1330 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Product Manager - Aiara Marketing</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      .sidebar {
+        width: 260px;
+        background: #1e293b;
+        color: white;
+        position: fixed;
+        height: 100vh;
+        overflow-y: auto;
+      }
+
+      .main-content {
+        margin-left: 260px;
+        min-height: 100vh;
+        background: #f8fafc;
+      }
+
+      .nav-item {
+        padding: 14px 24px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border-left: 3px solid transparent;
+      }
+
+      .nav-item:hover {
+        background: #334155;
+      }
+
+      .nav-item.active {
+        background: #334155;
+        border-left-color: #3b82f6;
+      }
+
+      .card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        padding: 24px;
+      }
+
+      .btn {
+        padding: 10px 20px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s;
+      }
+
+      .btn-primary {
+        background: #3b82f6;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #2563eb;
+      }
+
+      .btn-secondary {
+        background: #64748b;
+        color: white;
+      }
+
+      .btn-secondary:hover {
+        background: #475569;
+      }
+
+      .btn-danger {
+        background: #ef4444;
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background: #dc2626;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal.active {
+        display: flex;
+      }
+
+      .modal-content {
+        background: white;
+        border-radius: 8px;
+        max-width: 800px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 32px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 500;
+        color: #334155;
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 14px;
+      }
+
+      .form-group textarea {
+        resize: vertical;
+        min-height: 80px;
+      }
+
+      .stat-card {
+        background: white;
+        border-radius: 8px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .stat-number {
+        font-size: 32px;
+        font-weight: bold;
+        color: #1e293b;
+      }
+
+      .stat-label {
+        color: #64748b;
+        margin-top: 4px;
+      }
+
+      .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+      }
+
+      .product-card {
+        background: white;
+        border-radius: 8px;
+        padding: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s;
+      }
+
+      .product-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .product-image {
+        width: 100%;
+        height: 140px;
+        object-fit: contain;
+        background: #f8fafc;
+        border-radius: 6px;
+      }
+
+      .product-image-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .catalog-preview {
+        overflow-x: auto;
+        padding: 12px 0;
+      }
+
+      .catalog-sheet {
+        width: 210mm;
+        height: 297mm;
+        padding: 8mm;
+        margin: 0 auto 20px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background: white;
+        color: #1e293b;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+      }
+
+      .catalog-title {
+        flex: 0 0 auto;
+        margin-bottom: 3mm;
+        text-align: center;
+        font-size: 16pt;
+        font-weight: 700;
+        line-height: 1.1;
+      }
+
+      .catalog-brand-section {
+        flex: 0 0 auto;
+        margin-bottom: 1.5mm;
+      }
+
+      .catalog-brand-header {
+        display: flex;
+        align-items: center;
+        min-height: 7mm;
+        margin-bottom: 1mm;
+        padding: 1mm 3mm;
+        background: #111;
+        color: white;
+        font-size: 8.5pt;
+        font-weight: 700;
+        line-height: 1.2;
+        text-transform: uppercase;
+      }
+
+      .catalog-sock-grid {
+        display: grid;
+        grid-template-columns: repeat(8, minmax(0, 1fr));
+        gap: 0.8mm;
+      }
+
+      .catalog-sock {
+        height: 28mm;
+        min-width: 0;
+        display: grid;
+        grid-template-rows: 15mm auto minmax(0, 1fr);
+        justify-items: center;
+        gap: 0.5mm;
+        padding: 0.6mm;
+        overflow: hidden;
+        background: #fff;
+        text-align: center;
+      }
+
+      .catalog-sock img {
+        display: block;
+        width: 100%;
+        height: 15mm;
+        object-fit: contain;
+      }
+
+      .catalog-sock-price {
+        width: 100%;
+        overflow: hidden;
+        font-size: 7pt;
+        font-weight: 700;
+        line-height: 1.2;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .catalog-sock-description {
+        display: block;
+        width: 100%;
+        min-height: 0;
+        max-height: 3.6em;
+        overflow: hidden;
+        font-size: 5.5pt;
+        line-height: 1.2;
+        overflow-wrap: anywhere;
+      }
+
+      .catalog-footer {
+        margin-top: auto;
+        padding-top: 1.5mm;
+        border-top: 1px solid #d1d5db;
+        color: #64748b;
+        font-size: 7pt;
+        text-align: center;
+      }
+
+      .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #10b981;
+        color: white;
+        padding: 16px 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 2000;
+        display: none;
+      }
+
+      .toast.active {
+        display: block;
+        animation: slideIn 0.3s ease;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      .logo-container {
+        text-align: center;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+
+      .aiara-logo {
+        max-width: 200px;
+        height: auto;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #64748b;
+      }
+
+      .empty-state svg {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 20px;
+        opacity: 0.3;
+      }
+
+      @media (max-width: 700px) {
         .sidebar {
-            width: 260px;
-            background: #1e293b;
-            color: white;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-        }
-
-        .main-content {
-            margin-left: 260px;
-            min-height: 100vh;
-            background: #f8fafc;
-        }
-
-        .nav-item {
-            padding: 14px 24px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border-left: 3px solid transparent;
-        }
-
-        .nav-item:hover {
-            background: #334155;
-        }
-
-        .nav-item.active {
-            background: #334155;
-            border-left-color: #3b82f6;
-        }
-
-        .card {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            padding: 24px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .btn-primary {
-            background: #3b82f6;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #2563eb;
-        }
-
-        .btn-secondary {
-            background: #64748b;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #475569;
-        }
-
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 8px;
-            max-width: 800px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            padding: 32px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 500;
-            color: #334155;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .stat-card {
-            background: white;
-            border-radius: 8px;
-            padding: 24px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .stat-number {
-            font-size: 32px;
-            font-weight: bold;
-            color: #1e293b;
-        }
-
-        .stat-label {
-            color: #64748b;
-            margin-top: 4px;
-        }
-
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .product-card {
-            background: white;
-            border-radius: 8px;
-            padding: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            transition: all 0.2s;
-        }
-
-        .product-card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-
-        .product-image {
-            width: 100%;
-            height: 140px;
-            object-fit: contain;
-            background: #f8fafc;
-            border-radius: 6px;
-        }
-
-        .product-image-gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .catalog-preview {
-            overflow-x: auto;
-            padding: 12px 0;
-        }
-
-        .catalog-sheet {
-            width: 210mm;
-            height: 297mm;
-            padding: 8mm;
-            margin: 0 auto 20px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            background: white;
-            color: #1e293b;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-        }
-
-        .catalog-title {
-            flex: 0 0 auto;
-            margin-bottom: 3mm;
-            text-align: center;
-            font-size: 16pt;
-            font-weight: 700;
-            line-height: 1.1;
-        }
-
-        .catalog-brand-section {
-            flex: 0 0 auto;
-            margin-bottom: 1.5mm;
-        }
-
-        .catalog-brand-header {
-            display: flex;
-            align-items: center;
-            min-height: 7mm;
-            margin-bottom: 1mm;
-            padding: 1mm 3mm;
-            background: #111;
-            color: white;
-            font-size: 8.5pt;
-            font-weight: 700;
-            line-height: 1.2;
-            text-transform: uppercase;
-        }
-
-        .catalog-sock-grid {
-            display: grid;
-            grid-template-columns: repeat(8, minmax(0, 1fr));
-            gap: 0.8mm;
-        }
-
-        .catalog-sock {
-            height: 28mm;
-            min-width: 0;
-            display: grid;
-            grid-template-rows: 15mm auto minmax(0, 1fr);
-            justify-items: center;
-            gap: 0.5mm;
-            padding: 0.6mm;
-            overflow: hidden;
-            background: #fff;
-            text-align: center;
-        }
-
-        .catalog-sock img {
-            display: block;
-            width: 100%;
-            height: 15mm;
-            object-fit: contain;
-        }
-
-        .catalog-sock-price {
-            width: 100%;
-            overflow: hidden;
-            font-size: 7pt;
-            font-weight: 700;
-            line-height: 1.2;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .catalog-sock-description {
-            display: block;
-            width: 100%;
-            min-height: 0;
-            max-height: 3.6em;
-            overflow: hidden;
-            font-size: 5.5pt;
-            line-height: 1.2;
-            overflow-wrap: anywhere;
-        }
-
-        .catalog-footer {
-            margin-top: auto;
-            padding-top: 1.5mm;
-            border-top: 1px solid #d1d5db;
-            color: #64748b;
-            font-size: 7pt;
-            text-align: center;
-        }
-
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #10b981;
-            color: white;
-            padding: 16px 24px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 2000;
-            display: none;
-        }
-
-        .toast.active {
-            display: block;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+          z-index: 100;
+          display: flex;
+          width: 100%;
+          height: auto;
+          min-height: 58px;
+          overflow-x: auto;
+          overflow-y: hidden;
+          white-space: nowrap;
         }
 
         .logo-container {
-            text-align: center;
-            padding: 20px;
-            margin-bottom: 20px;
+          display: none;
         }
 
-        .aiara-logo {
-            max-width: 200px;
-            height: auto;
+        .sidebar .nav-item {
+          display: flex;
+          flex: 0 0 auto;
+          align-items: center;
+          min-height: 58px;
+          padding: 10px 14px;
+          border-left: 0;
+          border-bottom: 3px solid transparent;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #64748b;
+        .sidebar .nav-item.active {
+          border-bottom-color: #3b82f6;
         }
 
-        .empty-state svg {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 20px;
-            opacity: 0.3;
+        .sidebar .nav-item > div {
+          font-size: 14px !important;
         }
 
+        .main-content {
+          margin-left: 0;
+          padding-top: 58px;
+        }
+
+        .main-content > .page > div {
+          padding: 20px !important;
+        }
+
+        .product-grid {
+          grid-template-columns: repeat(
+            auto-fill,
+            minmax(min(100%, 220px), 1fr)
+          );
+          gap: 14px;
+        }
+
+        .product-card {
+          min-width: 0;
+        }
+
+        .product-image-gallery {
+          grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        }
+
+        .modal-content {
+          width: calc(100% - 24px);
+          max-height: calc(100dvh - 24px);
+          padding: 20px;
+        }
+
+        .modal-content h2 {
+          font-size: 20px !important;
+        }
+
+        .catalog-preview {
+          overflow-x: hidden;
+        }
+
+        .catalog-sheet {
+          width: 100%;
+          height: auto;
+          min-height: 0;
+          padding: 14px;
+          overflow: visible;
+        }
+
+        .catalog-title {
+          margin-bottom: 12px;
+          font-size: 18px;
+        }
+
+        .catalog-brand-section {
+          margin-bottom: 10px;
+        }
+
+        .catalog-brand-header {
+          min-height: 30px;
+          margin-bottom: 6px;
+          padding: 6px 10px;
+          font-size: 12px;
+        }
+
+        .catalog-sock-grid {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 6px;
+        }
+
+        .catalog-sock {
+          height: 136px;
+          grid-template-rows: 76px auto minmax(0, 1fr);
+          gap: 3px;
+          padding: 4px;
+        }
+
+        .catalog-sock img {
+          height: 76px;
+        }
+
+        .catalog-sock-price {
+          font-size: 10px;
+        }
+
+        .catalog-sock-description {
+          max-height: 4.8em;
+          font-size: 9px;
+          line-height: 1.2;
+        }
+
+        .catalog-footer {
+          margin-top: 14px;
+          padding-top: 8px;
+          font-size: 10px;
+        }
+
+        .toast {
+          top: 68px;
+          right: 12px;
+          left: 12px;
+          padding: 12px 16px;
+          text-align: center;
+        }
+      }
+
+      @media (max-width: 380px) {
+        .main-content > .page > div {
+          padding: 14px !important;
+        }
+
+        .catalog-sock-grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .modal-content {
+          padding: 16px;
+        }
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <!-- Sidebar -->
     <div class="sidebar">
-        <div class="logo-container">
-            <svg class="aiara-logo" viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
-                <!-- Aiara Logo -->
-                <circle cx="40" cy="50" r="30" fill="none" stroke="#f59e0b" stroke-width="4"/>
-                <circle cx="40" cy="50" r="20" fill="none" stroke="#3b82f6" stroke-width="4"/>
-                <circle cx="40" cy="50" r="12" fill="#fbbf24"/>
-                <path d="M 20 60 Q 25 70 40 65 Q 55 70 60 60" stroke="#f59e0b" stroke-width="3" fill="none"/>
-                <text x="80" y="50" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#64748b">Aiara</text>
-                <text x="80" y="70" font-family="Arial, sans-serif" font-size="14" fill="#94a3b8">MARKETING</text>
-            </svg>
-        </div>
-        
-        <div class="nav-item active" data-page="dashboard">
-            <div style="font-size: 18px;">📊 Dashboard</div>
-        </div>
-        <div class="nav-item" data-page="products">
-            <div style="font-size: 18px;">📦 Product Add</div>
-        </div>
-        <div class="nav-item" data-page="catalog">
-            <div style="font-size: 18px;">📄 Catalog</div>
-        </div>
+      <div class="logo-container">
+        <svg
+          class="aiara-logo"
+          viewBox="0 0 300 100"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <!-- Aiara Logo -->
+          <circle
+            cx="40"
+            cy="50"
+            r="30"
+            fill="none"
+            stroke="#f59e0b"
+            stroke-width="4"
+          />
+          <circle
+            cx="40"
+            cy="50"
+            r="20"
+            fill="none"
+            stroke="#3b82f6"
+            stroke-width="4"
+          />
+          <circle cx="40" cy="50" r="12" fill="#fbbf24" />
+          <path
+            d="M 20 60 Q 25 70 40 65 Q 55 70 60 60"
+            stroke="#f59e0b"
+            stroke-width="3"
+            fill="none"
+          />
+          <text
+            x="80"
+            y="50"
+            font-family="Arial, sans-serif"
+            font-size="28"
+            font-weight="bold"
+            fill="#64748b"
+          >
+            Aiara
+          </text>
+          <text
+            x="80"
+            y="70"
+            font-family="Arial, sans-serif"
+            font-size="14"
+            fill="#94a3b8"
+          >
+            MARKETING
+          </text>
+        </svg>
+      </div>
+
+      <div class="nav-item active" data-page="dashboard">
+        <div style="font-size: 18px">📊 Dashboard</div>
+      </div>
+      <div class="nav-item" data-page="products">
+        <div style="font-size: 18px">📦 Product Add</div>
+      </div>
+      <div class="nav-item" data-page="catalog">
+        <div style="font-size: 18px">📄 Catalog</div>
+      </div>
     </div>
 
     <!-- Main Content -->
     <div class="main-content">
-        <!-- Dashboard Page -->
-        <div id="dashboard-page" class="page">
-            <div style="padding: 30px;">
-                <h1 style="font-size: 28px; font-weight: bold; margin-bottom: 30px; color: #1e293b;">Dashboard</h1>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px;">
-                    <div class="stat-card">
-                        <div class="stat-number" id="total-products">0</div>
-                        <div class="stat-label">Total Products</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+      <!-- Dashboard Page -->
+      <div id="dashboard-page" class="page">
+        <div style="padding: 30px">
+          <h1
+            style="
+              font-size: 28px;
+              font-weight: bold;
+              margin-bottom: 30px;
+              color: #1e293b;
+            "
+          >
+            Dashboard
+          </h1>
 
-        <!-- Products Page -->
-        <div id="products-page" class="page" style="display: none;">
-            <div style="padding: 30px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                    <h1 style="font-size: 28px; font-weight: bold; color: #1e293b;">Product Add</h1>
-                    <button class="btn btn-primary" onclick="openAddProductModal()">+ Add Product</button>
-                </div>
-                
-                <div class="product-grid" id="products-list"></div>
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+              gap: 20px;
+              margin-bottom: 40px;
+            "
+          >
+            <div class="stat-card">
+              <div class="stat-number" id="total-products">0</div>
+              <div class="stat-label">Total Products</div>
             </div>
+          </div>
         </div>
+      </div>
 
-        <!-- Catalog Page -->
-        <div id="catalog-page" class="page" style="display: none;">
-            <div style="padding: 30px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px;">
-                    <h1 style="font-size: 28px; font-weight: bold; color: #1e293b;">Catalog</h1>
-                    <button id="generate-pdf-button" class="btn btn-primary" onclick="generatePDF()">Convert to PDF</button>
-                </div>
-                <div id="catalog-status" style="color: #64748b; margin-bottom: 12px;"></div>
-                <div id="catalog-preview" class="catalog-preview"></div>
-            </div>
+      <!-- Products Page -->
+      <div id="products-page" class="page" style="display: none">
+        <div style="padding: 30px">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 30px;
+            "
+          >
+            <h1 style="font-size: 28px; font-weight: bold; color: #1e293b">
+              Product Add
+            </h1>
+            <button class="btn btn-primary" onclick="openAddProductModal()">
+              + Add Product
+            </button>
+          </div>
+
+          <div class="product-grid" id="products-list"></div>
         </div>
+      </div>
 
+      <!-- Catalog Page -->
+      <div id="catalog-page" class="page" style="display: none">
+        <div style="padding: 30px">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              gap: 16px;
+              margin-bottom: 20px;
+            "
+          >
+            <h1 style="font-size: 28px; font-weight: bold; color: #1e293b">
+              Catalog
+            </h1>
+            <button
+              id="generate-pdf-button"
+              class="btn btn-primary"
+              onclick="generatePDF()"
+            >
+              Convert to PDF
+            </button>
+          </div>
+          <div
+            id="catalog-status"
+            style="color: #64748b; margin-bottom: 12px"
+          ></div>
+          <div id="catalog-preview" class="catalog-preview"></div>
+        </div>
+      </div>
     </div>
 
     <!-- Add Product Modal -->
     <div id="product-modal" class="modal">
-        <div class="modal-content">
-            <h2 id="product-modal-title" style="font-size: 24px; font-weight: bold; margin-bottom: 24px; color: #1e293b;">Add Product</h2>
-            <form onsubmit="saveProduct(event)">
-                <div class="form-group">
-                    <label for="product-brand-name">Brand Name *</label>
-                    <input type="text" id="product-brand-name" required>
-                </div>
-                <div class="form-group">
-                    <label for="product-images">Images *</label>
-                    <input type="file" id="product-images" accept="image/*" multiple onchange="previewProductImages(event)">
-                    <div id="product-images-preview" class="product-image-gallery" style="margin-top: 10px;"></div>
-                </div>
-                <div class="form-group">
-                    <label for="product-price">Price *</label>
-                    <input type="number" id="product-price" min="0" step="0.01" required>
-                </div>
-                <div class="form-group">
-                    <label for="product-description">Description</label>
-                    <textarea id="product-description"></textarea>
-                </div>
-                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 30px;">
-                    <button type="button" class="btn btn-secondary" onclick="closeProductModal()">Cancel</button>
-                    <button id="product-submit-button" type="submit" class="btn btn-primary">Save Product</button>
-                </div>
-            </form>
-        </div>
+      <div class="modal-content">
+        <h2
+          id="product-modal-title"
+          style="
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 24px;
+            color: #1e293b;
+          "
+        >
+          Add Product
+        </h2>
+        <form onsubmit="saveProduct(event)">
+          <div class="form-group">
+            <label for="product-brand-name">Brand Name *</label>
+            <input type="text" id="product-brand-name" required />
+          </div>
+          <div class="form-group">
+            <label for="product-images">Images *</label>
+            <input
+              type="file"
+              id="product-images"
+              accept="image/*"
+              multiple
+              onchange="previewProductImages(event)"
+            />
+            <div
+              id="product-images-preview"
+              class="product-image-gallery"
+              style="margin-top: 10px"
+            ></div>
+          </div>
+          <div class="form-group">
+            <label for="product-price">Price *</label>
+            <input
+              type="number"
+              id="product-price"
+              min="0"
+              step="0.01"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="product-description">Description</label>
+            <textarea id="product-description"></textarea>
+          </div>
+          <div
+            style="
+              display: flex;
+              gap: 10px;
+              justify-content: flex-end;
+              margin-top: 30px;
+            "
+          >
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeProductModal()"
+            >
+              Cancel
+            </button>
+            <button
+              id="product-submit-button"
+              type="submit"
+              class="btn btn-primary"
+            >
+              Save Product
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
 
     <script>
-        // Data Storage
-        let products = JSON.parse(localStorage.getItem('productEntries')) || [];
-        let currentEditId = null;
-        let catalogPages = [];
+      // Data Storage
+      let products = JSON.parse(localStorage.getItem("productEntries")) || [];
+      let currentEditId = null;
+      let catalogPages = [];
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            initNavigation();
-            updateDashboard();
-            renderProducts();
+      // Initialize
+      document.addEventListener("DOMContentLoaded", function () {
+        initNavigation();
+        updateDashboard();
+        renderProducts();
+      });
+
+      // Navigation
+      function initNavigation() {
+        document.querySelectorAll(".nav-item").forEach((item) => {
+          item.addEventListener("click", function () {
+            const page = this.getAttribute("data-page");
+            switchPage(page);
+          });
         });
+      }
 
-        // Navigation
-        function initNavigation() {
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.addEventListener('click', function() {
-                    const page = this.getAttribute('data-page');
-                    switchPage(page);
-                });
-            });
+      function switchPage(page) {
+        document
+          .querySelectorAll(".page")
+          .forEach((p) => (p.style.display = "none"));
+        document
+          .querySelectorAll(".nav-item")
+          .forEach((n) => n.classList.remove("active"));
+
+        document.getElementById(page + "-page").style.display = "block";
+        document.querySelector(`[data-page="${page}"]`).classList.add("active");
+        if (page === "catalog") {
+          generateCatalogPreview();
+        }
+      }
+
+      // Toast Notification
+      function showToast(message, type = "success") {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.style.background = type === "success" ? "#10b981" : "#ef4444";
+        toast.classList.add("active");
+        setTimeout(() => {
+          toast.classList.remove("active");
+        }, 3000);
+      }
+
+      // Product Functions
+      function openAddProductModal() {
+        currentEditId = null;
+        document.getElementById("product-brand-name").value = "";
+        document.getElementById("product-images").value = "";
+        document.getElementById("product-price").value = "";
+        document.getElementById("product-description").value = "";
+        document.getElementById("product-images-preview").innerHTML = "";
+        document.getElementById("product-modal-title").textContent =
+          "Add Product";
+        document.getElementById("product-submit-button").textContent =
+          "Save Product";
+        document.getElementById("product-modal").classList.add("active");
+      }
+
+      function closeProductModal() {
+        document.getElementById("product-modal").classList.remove("active");
+        currentEditId = null;
+      }
+
+      function editProduct(id) {
+        const product = products.find((item) => item.id === id);
+        if (!product) return;
+
+        currentEditId = id;
+        document.getElementById("product-brand-name").value = product.brandName;
+        document.getElementById("product-images").value = "";
+        document.getElementById("product-price").value = product.price;
+        document.getElementById("product-description").value =
+          product.description || "";
+        document.getElementById("product-images-preview").innerHTML =
+          product.images
+            .map(
+              (image) =>
+                `<img src="${image}" class="product-image" alt="${escapeHTML(product.brandName)}">`,
+            )
+            .join("");
+        document.getElementById("product-modal-title").textContent =
+          "Edit Product";
+        document.getElementById("product-submit-button").textContent =
+          "Update Product";
+        document.getElementById("product-modal").classList.add("active");
+      }
+
+      function previewProductImages(event) {
+        const files = Array.from(event.target.files);
+        if (files.length > 0) {
+          const reader = new FileReader();
+          const previews = files.map(
+            (file) =>
+              new Promise((resolve, reject) => {
+                const imageReader = new FileReader();
+                imageReader.onload = () =>
+                  resolve(
+                    `<img src="${imageReader.result}" class="product-image" alt="${escapeHTML(file.name)}">`,
+                  );
+                imageReader.onerror = () => reject(imageReader.error);
+                imageReader.readAsDataURL(file);
+              }),
+          );
+          Promise.all(previews).then((images) => {
+            document.getElementById("product-images-preview").innerHTML =
+              images.join("");
+          });
+        }
+      }
+
+      function escapeHTML(value) {
+        return String(value).replace(
+          /[&<>"']/g,
+          (character) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[character],
+        );
+      }
+
+      async function saveProduct(event) {
+        event.preventDefault();
+        const brandName = document
+          .getElementById("product-brand-name")
+          .value.trim();
+        const price = Number(document.getElementById("product-price").value);
+        const description = document
+          .getElementById("product-description")
+          .value.trim();
+        const imageFiles = Array.from(
+          document.getElementById("product-images").files,
+        );
+        const existingProduct = products.find(
+          (product) => product.id === currentEditId,
+        );
+
+        if (
+          (!existingProduct && imageFiles.length === 0) ||
+          !brandName ||
+          !Number.isFinite(price) ||
+          price < 0
+        ) {
+          showToast(
+            "Enter a brand name, at least one image, and a valid price.",
+            "error",
+          );
+          return;
         }
 
-        function switchPage(page) {
-            document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            
-            document.getElementById(page + '-page').style.display = 'block';
-            document.querySelector(`[data-page="${page}"]`).classList.add('active');
-            if (page === 'catalog') {
-                generateCatalogPreview();
-            }
+        try {
+          const newImages = await Promise.all(
+            imageFiles.map(
+              (file) =>
+                new Promise((resolve, reject) => {
+                  const reader = new FileReader();
+                  reader.onload = () => resolve(reader.result);
+                  reader.onerror = () => reject(reader.error);
+                  reader.readAsDataURL(file);
+                }),
+            ),
+          );
+          const product = {
+            id: currentEditId || Date.now(),
+            brandName: brandName,
+            images: newImages.length > 0 ? newImages : existingProduct.images,
+            price: price,
+            description: description,
+          };
+
+          if (existingProduct) {
+            products = products.map((item) =>
+              item.id === currentEditId ? product : item,
+            );
+          } else {
+            products.push(product);
+          }
+          localStorage.setItem("productEntries", JSON.stringify(products));
+          renderProducts();
+          updateDashboard();
+          closeProductModal();
+          showToast(
+            existingProduct
+              ? "Product updated successfully!"
+              : "Product saved successfully!",
+          );
+        } catch (error) {
+          showToast("Could not read the selected images.", "error");
+        }
+      }
+
+      function deleteProduct(id) {
+        if (confirm("Are you sure you want to delete this product?")) {
+          products = products.filter((product) => product.id !== id);
+          localStorage.setItem("productEntries", JSON.stringify(products));
+          renderProducts();
+          updateDashboard();
+          showToast("Product deleted successfully!");
+        }
+      }
+
+      function renderProducts() {
+        const container = document.getElementById("products-list");
+        if (products.length === 0) {
+          container.innerHTML =
+            '<div class="empty-state"><div style="font-size: 48px;">📦</div><div style="font-size: 18px;">No products yet</div><div style="margin-top: 10px;">Add your first product to get started.</div></div>';
+          return;
         }
 
-        // Toast Notification
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.style.background = type === 'success' ? '#10b981' : '#ef4444';
-            toast.classList.add('active');
-            setTimeout(() => {
-                toast.classList.remove('active');
-            }, 3000);
-        }
-
-        // Product Functions
-        function openAddProductModal() {
-            currentEditId = null;
-            document.getElementById('product-brand-name').value = '';
-            document.getElementById('product-images').value = '';
-            document.getElementById('product-price').value = '';
-            document.getElementById('product-description').value = '';
-            document.getElementById('product-images-preview').innerHTML = '';
-            document.getElementById('product-modal-title').textContent = 'Add Product';
-            document.getElementById('product-submit-button').textContent = 'Save Product';
-            document.getElementById('product-modal').classList.add('active');
-        }
-
-        function closeProductModal() {
-            document.getElementById('product-modal').classList.remove('active');
-            currentEditId = null;
-        }
-
-        function editProduct(id) {
-            const product = products.find(item => item.id === id);
-            if (!product) return;
-
-            currentEditId = id;
-            document.getElementById('product-brand-name').value = product.brandName;
-            document.getElementById('product-images').value = '';
-            document.getElementById('product-price').value = product.price;
-            document.getElementById('product-description').value = product.description || '';
-            document.getElementById('product-images-preview').innerHTML = product.images
-                .map(image => `<img src="${image}" class="product-image" alt="${escapeHTML(product.brandName)}">`)
-                .join('');
-            document.getElementById('product-modal-title').textContent = 'Edit Product';
-            document.getElementById('product-submit-button').textContent = 'Update Product';
-            document.getElementById('product-modal').classList.add('active');
-        }
-
-        function previewProductImages(event) {
-            const files = Array.from(event.target.files);
-            if (files.length > 0) {
-                const reader = new FileReader();
-                const previews = files.map(file => new Promise((resolve, reject) => {
-                    const imageReader = new FileReader();
-                    imageReader.onload = () => resolve(`<img src="${imageReader.result}" class="product-image" alt="${escapeHTML(file.name)}">`);
-                    imageReader.onerror = () => reject(imageReader.error);
-                    imageReader.readAsDataURL(file);
-                }));
-                Promise.all(previews).then(images => {
-                    document.getElementById('product-images-preview').innerHTML = images.join('');
-                });
-            }
-        }
-
-        function escapeHTML(value) {
-            return String(value).replace(/[&<>"']/g, character => ({
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#39;'
-            })[character]);
-        }
-
-        async function saveProduct(event) {
-            event.preventDefault();
-            const brandName = document.getElementById('product-brand-name').value.trim();
-            const price = Number(document.getElementById('product-price').value);
-            const description = document.getElementById('product-description').value.trim();
-            const imageFiles = Array.from(document.getElementById('product-images').files);
-            const existingProduct = products.find(product => product.id === currentEditId);
-
-            if ((!existingProduct && imageFiles.length === 0) || !brandName || !Number.isFinite(price) || price < 0) {
-                showToast('Enter a brand name, at least one image, and a valid price.', 'error');
-                return;
-            }
-
-            try {
-                const newImages = await Promise.all(imageFiles.map(file => new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = () => reject(reader.error);
-                    reader.readAsDataURL(file);
-                })));
-                const product = {
-                    id: currentEditId || Date.now(),
-                    brandName: brandName,
-                    images: newImages.length > 0 ? newImages : existingProduct.images,
-                    price: price,
-                    description: description
-                };
-                
-                if (existingProduct) {
-                    products = products.map(item => item.id === currentEditId ? product : item);
-                } else {
-                    products.push(product);
-                }
-                localStorage.setItem('productEntries', JSON.stringify(products));
-                renderProducts();
-                updateDashboard();
-                closeProductModal();
-                showToast(existingProduct ? 'Product updated successfully!' : 'Product saved successfully!');
-            } catch (error) {
-                showToast('Could not read the selected images.', 'error');
-            }
-        }
-
-        function deleteProduct(id) {
-            if (confirm('Are you sure you want to delete this product?')) {
-                products = products.filter(product => product.id !== id);
-                localStorage.setItem('productEntries', JSON.stringify(products));
-                renderProducts();
-                updateDashboard();
-                showToast('Product deleted successfully!');
-            }
-        }
-
-        function renderProducts() {
-            const container = document.getElementById('products-list');
-            if (products.length === 0) {
-                container.innerHTML = '<div class="empty-state"><div style="font-size: 48px;">📦</div><div style="font-size: 18px;">No products yet</div><div style="margin-top: 10px;">Add your first product to get started.</div></div>';
-                return;
-            }
-            
-            container.innerHTML = products.map(product => {
-                return `
+        container.innerHTML = products
+          .map((product) => {
+            return `
                     <div class="product-card">
-                        <div class="product-image-gallery">${product.images.map(image => `<img src="${image}" class="product-image" alt="${escapeHTML(product.brandName)}">`).join('')}</div>
+                        <div class="product-image-gallery">${product.images.map((image) => `<img src="${image}" class="product-image" alt="${escapeHTML(product.brandName)}">`).join("")}</div>
                         <h3 style="font-weight: 600; margin-bottom: 8px;">${escapeHTML(product.brandName)}</h3>
                         <p style="font-weight: 600; color: #1e293b;">Price: ${Number(product.price).toFixed(2)}</p>
-                        <p style="color: #64748b; font-size: 14px; margin-top: 8px;">${escapeHTML(product.description || '')}</p>
+                        <p style="color: #64748b; font-size: 14px; margin-top: 8px;">${escapeHTML(product.description || "")}</p>
                         <div style="display: flex; gap: 8px; margin-top: 12px;">
                             <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="editProduct(${Number(product.id)})">Edit</button>
                             <button class="btn btn-danger" style="padding: 6px 12px; font-size: 12px;" onclick="deleteProduct(${Number(product.id)})">Delete</button>
                         </div>
                     </div>
                 `;
-            }).join('');
-        }
+          })
+          .join("");
+      }
 
-        // Dashboard
-        function updateDashboard() {
-            document.getElementById('total-products').textContent = products.length;
-        }
+      // Dashboard
+      function updateDashboard() {
+        document.getElementById("total-products").textContent = products.length;
+      }
 
-        function getCatalogSocks() {
-            return products.flatMap(product => (product.images || []).map(image => ({
-                brandName: product.brandName.trim(),
-                image: image,
-                price: Number(product.price),
-                description: product.description || ''
-            }))).filter(sock => sock.brandName && sock.image);
-        }
+      function getCatalogSocks() {
+        return products
+          .flatMap((product) =>
+            (product.images || []).map((image) => ({
+              brandName: product.brandName.trim(),
+              image: image,
+              price: Number(product.price),
+              description: product.description || "",
+            })),
+          )
+          .filter((sock) => sock.brandName && sock.image);
+      }
 
-        function paginateSocks(socks) {
-            if (socks.length === 0) return [];
+      function paginateSocks(socks) {
+        if (socks.length === 0) return [];
 
-            const maxSocksPerPage = 50;
-            const maxBrandSectionsPerPage = 6;
-            const maxContentHeight = 263;
-            const sectionHeaderHeight = 9.5;
-            const gridRowHeight = 28;
-            const gridRowGap = 0.8;
-            const brandGroups = new Map();
+        const maxSocksPerPage = 50;
+        const maxBrandSectionsPerPage = 6;
+        const maxContentHeight = 263;
+        const sectionHeaderHeight = 9.5;
+        const gridRowHeight = 28;
+        const gridRowGap = 0.8;
+        const brandGroups = new Map();
 
-            socks.forEach(sock => {
-                const key = sock.brandName.toLocaleLowerCase();
-                if (!brandGroups.has(key)) {
-                    brandGroups.set(key, { brandName: sock.brandName, socks: [] });
-                }
-                brandGroups.get(key).socks.push(sock);
+        socks.forEach((sock) => {
+          const key = sock.brandName.toLocaleLowerCase();
+          if (!brandGroups.has(key)) {
+            brandGroups.set(key, { brandName: sock.brandName, socks: [] });
+          }
+          brandGroups.get(key).socks.push(sock);
+        });
+
+        const pages = [];
+        let currentPage = [];
+        let pageSockCount = 0;
+        let pageContentHeight = 0;
+
+        const finishPage = () => {
+          if (currentPage.length > 0) pages.push(currentPage);
+          currentPage = [];
+          pageSockCount = 0;
+          pageContentHeight = 0;
+        };
+
+        brandGroups.forEach((group) => {
+          let offset = 0;
+          while (offset < group.socks.length) {
+            if (currentPage.length >= maxBrandSectionsPerPage) {
+              finishPage();
+            }
+
+            const availableHeight =
+              maxContentHeight - pageContentHeight - sectionHeaderHeight;
+            const availableRows = Math.floor(
+              (availableHeight + gridRowGap) / (gridRowHeight + gridRowGap),
+            );
+            const availableSocks = Math.min(
+              maxSocksPerPage - pageSockCount,
+              availableRows * 8,
+            );
+
+            if (availableSocks <= 0) {
+              finishPage();
+              continue;
+            }
+
+            const count = Math.min(group.socks.length - offset, availableSocks);
+            const rows = Math.ceil(count / 10);
+            currentPage.push({
+              brandName: group.brandName,
+              socks: group.socks.slice(offset, offset + count),
             });
+            offset += count;
+            pageSockCount += count;
+            pageContentHeight +=
+              sectionHeaderHeight +
+              rows * gridRowHeight +
+              (rows - 1) * gridRowGap;
 
-            const pages = [];
-            let currentPage = [];
-            let pageSockCount = 0;
-            let pageContentHeight = 0;
+            if (
+              pageSockCount >= maxSocksPerPage ||
+              offset < group.socks.length
+            ) {
+              finishPage();
+            }
+          }
+        });
 
-            const finishPage = () => {
-                if (currentPage.length > 0) pages.push(currentPage);
-                currentPage = [];
-                pageSockCount = 0;
-                pageContentHeight = 0;
-            };
+        finishPage();
+        return pages;
+      }
 
-            brandGroups.forEach(group => {
-                let offset = 0;
-                while (offset < group.socks.length) {
-                    if (currentPage.length >= maxBrandSectionsPerPage) {
-                        finishPage();
-                    }
-
-                    const availableHeight = maxContentHeight - pageContentHeight - sectionHeaderHeight;
-                    const availableRows = Math.floor((availableHeight + gridRowGap) / (gridRowHeight + gridRowGap));
-                    const availableSocks = Math.min(
-                        maxSocksPerPage - pageSockCount,
-                        availableRows * 8
-                    );
-
-                    if (availableSocks <= 0) {
-                        finishPage();
-                        continue;
-                    }
-
-                    const count = Math.min(group.socks.length - offset, availableSocks);
-                    const rows = Math.ceil(count / 10);
-                    currentPage.push({
-                        brandName: group.brandName,
-                        socks: group.socks.slice(offset, offset + count)
-                    });
-                    offset += count;
-                    pageSockCount += count;
-                    pageContentHeight += sectionHeaderHeight + rows * gridRowHeight + (rows - 1) * gridRowGap;
-
-                    if (pageSockCount >= maxSocksPerPage || offset < group.socks.length) {
-                        finishPage();
-                    }
-                }
-            });
-
-            finishPage();
-            return pages;
-        }
-
-        function renderCatalogPage(brandGroups, pageIndex, pageCount) {
-            const sections = brandGroups.map(group => `
+      function renderCatalogPage(brandGroups, pageIndex, pageCount) {
+        const sections = brandGroups
+          .map(
+            (group) => `
                 <section class="catalog-brand-section">
                     <h2 class="catalog-brand-header">${escapeHTML(group.brandName)}</h2>
                     <div class="catalog-sock-grid">
-                        ${group.socks.map(sock => `
+                        ${group.socks
+                          .map(
+                            (sock) => `
                             <article class="catalog-sock">
                                 <img src="${sock.image}" alt="${escapeHTML(group.brandName)} sock">
                                 <div class="catalog-sock-price">Price: ${Number(sock.price).toFixed(2)}</div>
-                                <div class="catalog-sock-description">${escapeHTML(sock.description || '')}</div>
+                                <div class="catalog-sock-description">${escapeHTML(sock.description || "")}</div>
                             </article>
-                        `).join('')}
+                        `,
+                          )
+                          .join("")}
                     </div>
                 </section>
-            `).join('');
+            `,
+          )
+          .join("");
 
-            return `
+        return `
                 <article class="catalog-sheet">
                     <h1 class="catalog-title">SOCK COLLECTION</h1>
                     ${sections}
                     <footer class="catalog-footer">Aiara Marketing | Page ${pageIndex + 1} of ${pageCount}</footer>
                 </article>
             `;
+      }
+
+      function generateCatalogPreview() {
+        const preview = document.getElementById("catalog-preview");
+        const status = document.getElementById("catalog-status");
+        const pdfButton = document.getElementById("generate-pdf-button");
+        const socks = getCatalogSocks();
+        const pages = paginateSocks(socks);
+
+        catalogPages = pages.map((page, index) =>
+          renderCatalogPage(page, index, pages.length),
+        );
+        pdfButton.disabled = catalogPages.length === 0;
+
+        if (catalogPages.length === 0) {
+          status.textContent = "";
+          preview.innerHTML =
+            '<div class="empty-state"><div style="font-size: 48px;">📄</div><div style="font-size: 18px;">No sock images to display</div><div style="margin-top: 10px;">Add products and images in Product Add first.</div></div>';
+          return;
         }
 
-        function generateCatalogPreview() {
-            const preview = document.getElementById('catalog-preview');
-            const status = document.getElementById('catalog-status');
-            const pdfButton = document.getElementById('generate-pdf-button');
-            const socks = getCatalogSocks();
-            const pages = paginateSocks(socks);
+        status.textContent = `${socks.length} socks | ${catalogPages.length} PDF page${catalogPages.length === 1 ? "" : "s"}`;
+        preview.innerHTML = catalogPages.join("");
+      }
 
-            catalogPages = pages.map((page, index) => renderCatalogPage(page, index, pages.length));
-            pdfButton.disabled = catalogPages.length === 0;
-
-            if (catalogPages.length === 0) {
-                status.textContent = '';
-                preview.innerHTML = '<div class="empty-state"><div style="font-size: 48px;">📄</div><div style="font-size: 18px;">No sock images to display</div><div style="margin-top: 10px;">Add products and images in Product Add first.</div></div>';
-                return;
+      function loadPDFImage(dataUrl) {
+        return new Promise((resolve, reject) => {
+          const image = new Image();
+          image.onload = function () {
+            const canvas = document.createElement("canvas");
+            canvas.width = image.naturalWidth || image.width;
+            canvas.height = image.naturalHeight || image.height;
+            const context = canvas.getContext("2d");
+            if (!context) {
+              reject(new Error("Could not prepare product image."));
+              return;
             }
-
-            status.textContent = `${socks.length} socks | ${catalogPages.length} PDF page${catalogPages.length === 1 ? '' : 's'}`;
-            preview.innerHTML = catalogPages.join('');
-        }
-
-        function loadPDFImage(dataUrl) {
-            return new Promise((resolve, reject) => {
-                const image = new Image();
-                image.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = image.naturalWidth || image.width;
-                    canvas.height = image.naturalHeight || image.height;
-                    const context = canvas.getContext('2d');
-                    if (!context) {
-                        reject(new Error('Could not prepare product image.'));
-                        return;
-                    }
-                    context.fillStyle = '#ffffff';
-                    context.fillRect(0, 0, canvas.width, canvas.height);
-                    context.drawImage(image, 0, 0);
-                    resolve({
-                        data: canvas.toDataURL('image/jpeg', 0.92),
-                        width: canvas.width,
-                        height: canvas.height
-                    });
-                };
-                image.onerror = () => reject(new Error('Could not read product image.'));
-                image.src = dataUrl;
+            context.fillStyle = "#ffffff";
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.drawImage(image, 0, 0);
+            resolve({
+              data: canvas.toDataURL("image/jpeg", 0.92),
+              width: canvas.width,
+              height: canvas.height,
             });
+          };
+          image.onerror = () =>
+            reject(new Error("Could not read product image."));
+          image.src = dataUrl;
+        });
+      }
+
+      function getPDFDescriptionLines(pdf, description, maxWidth) {
+        const lines = pdf.splitTextToSize(description || "", maxWidth);
+        if (lines.length > 3) {
+          let lastLine = lines[2];
+          while (lastLine && pdf.getTextWidth(`${lastLine}...`) > maxWidth) {
+            lastLine = lastLine.slice(0, -1);
+          }
+          lines[2] = `${lastLine.trimEnd()}...`;
+          return lines.slice(0, 3);
+        }
+        return lines;
+      }
+
+      async function generatePDF() {
+        const socks = getCatalogSocks();
+        const pages = paginateSocks(socks);
+        if (pages.length === 0) {
+          showToast("Add product images before creating a catalog.", "error");
+          return;
         }
 
-        function getPDFDescriptionLines(pdf, description, maxWidth) {
-            const lines = pdf.splitTextToSize(description || '', maxWidth);
-            if (lines.length > 3) {
-                let lastLine = lines[2];
-                while (lastLine && pdf.getTextWidth(`${lastLine}...`) > maxWidth) {
-                    lastLine = lastLine.slice(0, -1);
+        if (!window.jspdf?.jsPDF) {
+          showToast(
+            "PDF tools did not load. Check your internet connection and try again.",
+            "error",
+          );
+          return;
+        }
+
+        const button = document.getElementById("generate-pdf-button");
+        button.disabled = true;
+        button.textContent = "Creating PDF...";
+
+        try {
+          const { jsPDF } = window.jspdf;
+          const pdf = new jsPDF("p", "mm", "a4");
+          const imageCache = new Map();
+          const pageWidth = 210;
+          const margin = 8;
+          const contentWidth = pageWidth - margin * 2;
+          const columns = 8;
+          const tileGap = 1.2;
+          const tileWidth = (contentWidth - tileGap * (columns - 1)) / columns;
+          const tileHeight = 28;
+          const imageHeight = 15;
+          const rowGap = 0.8;
+          const brandBarHeight = 7;
+
+          for (let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
+            if (pageIndex > 0) pdf.addPage("a4", "p");
+
+            pdf.setTextColor(30, 41, 59);
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(16);
+            pdf.text("SOCK COLLECTION", pageWidth / 2, 16, { align: "center" });
+
+            let y = 24;
+            for (const group of pages[pageIndex]) {
+              pdf.setFillColor(17, 17, 17);
+              pdf.rect(margin, y, contentWidth, brandBarHeight, "F");
+              pdf.setTextColor(255, 255, 255);
+              pdf.setFont("helvetica", "bold");
+              pdf.setFontSize(8.5);
+              pdf.text(
+                group.brandName.toLocaleUpperCase(),
+                margin + 3,
+                y + 4.9,
+              );
+
+              const gridTop = y + brandBarHeight + 1;
+              const rowCount = Math.ceil(group.socks.length / columns);
+              for (let row = 0; row < rowCount; row++) {
+                const rowSocks = group.socks.slice(
+                  row * columns,
+                  (row + 1) * columns,
+                );
+                const rowTop = gridTop + row * (tileHeight + rowGap);
+
+                for (let column = 0; column < rowSocks.length; column++) {
+                  const sock = rowSocks[column];
+                  const tileX = margin + column * (tileWidth + tileGap);
+                  const imageBoxX = tileX + 0.5;
+                  const imageBoxY = rowTop + 0.5;
+                  const imageBoxWidth = tileWidth - 1;
+                  const imageBoxHeight = imageHeight;
+
+                  pdf.setFillColor(248, 250, 252);
+                  pdf.rect(
+                    imageBoxX,
+                    imageBoxY,
+                    imageBoxWidth,
+                    imageBoxHeight,
+                    "F",
+                  );
+
+                  let pdfImage = imageCache.get(sock.image);
+                  if (!pdfImage) {
+                    pdfImage = await loadPDFImage(sock.image);
+                    imageCache.set(sock.image, pdfImage);
+                  }
+                  const imageScale = Math.min(
+                    (imageBoxWidth - 1) / pdfImage.width,
+                    (imageBoxHeight - 1) / pdfImage.height,
+                  );
+                  const imageWidth = pdfImage.width * imageScale;
+                  const imageDrawHeight = pdfImage.height * imageScale;
+                  pdf.addImage(
+                    pdfImage.data,
+                    "JPEG",
+                    imageBoxX + (imageBoxWidth - imageWidth) / 2,
+                    imageBoxY + (imageBoxHeight - imageDrawHeight) / 2,
+                    imageWidth,
+                    imageDrawHeight,
+                    undefined,
+                    "FAST",
+                  );
+
+                  pdf.setTextColor(30, 41, 59);
+                  pdf.setFont("helvetica", "bold");
+                  pdf.setFontSize(6.5);
+                  pdf.text(
+                    `Price: ${Number(sock.price).toFixed(2)}`,
+                    tileX + tileWidth / 2,
+                    rowTop + 17.3,
+                    { align: "center" },
+                  );
+
+                  pdf.setFont("helvetica", "normal");
+                  pdf.setFontSize(5.5);
+                  const descriptionLines = getPDFDescriptionLines(
+                    pdf,
+                    sock.description,
+                    tileWidth - 1.2,
+                  );
+                  if (descriptionLines.length > 0) {
+                    pdf.text(
+                      descriptionLines,
+                      tileX + tileWidth / 2,
+                      rowTop + 19.6,
+                      {
+                        align: "center",
+                        lineHeightFactor: 1.2,
+                      },
+                    );
+                  }
                 }
-                lines[2] = `${lastLine.trimEnd()}...`;
-                return lines.slice(0, 3);
+              }
+
+              y =
+                gridTop + rowCount * tileHeight + (rowCount - 1) * rowGap + 1.5;
             }
-            return lines;
+
+            pdf.setDrawColor(209, 213, 219);
+            pdf.line(margin, 287, pageWidth - margin, 287);
+            pdf.setTextColor(100, 116, 139);
+            pdf.setFont("helvetica", "normal");
+            pdf.setFontSize(7);
+            pdf.text(
+              `Aiara Marketing | Page ${pageIndex + 1} of ${pages.length}`,
+              pageWidth / 2,
+              291,
+              { align: "center" },
+            );
+          }
+
+          pdf.save("sock-catalog.pdf");
+          showToast("Catalog PDF downloaded.");
+        } catch (error) {
+          console.error("PDF generation error:", error);
+          showToast("Could not create the PDF. Please try again.", "error");
+        } finally {
+          button.disabled = false;
+          button.textContent = "Convert to PDF";
         }
-
-        async function generatePDF() {
-            const socks = getCatalogSocks();
-            const pages = paginateSocks(socks);
-            if (pages.length === 0) {
-                showToast('Add product images before creating a catalog.', 'error');
-                return;
-            }
-
-            if (!window.jspdf?.jsPDF) {
-                showToast('PDF tools did not load. Check your internet connection and try again.', 'error');
-                return;
-            }
-
-            const button = document.getElementById('generate-pdf-button');
-            button.disabled = true;
-            button.textContent = 'Creating PDF...';
-
-            try {
-                const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                const imageCache = new Map();
-                const pageWidth = 210;
-                const margin = 8;
-                const contentWidth = pageWidth - margin * 2;
-                const columns = 8;
-                const tileGap = 1.2;
-                const tileWidth = (contentWidth - tileGap * (columns - 1)) / columns;
-                const tileHeight = 28;
-                const imageHeight = 15;
-                const rowGap = 0.8;
-                const brandBarHeight = 7;
-
-                for (let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
-                    if (pageIndex > 0) pdf.addPage('a4', 'p');
-
-                    pdf.setTextColor(30, 41, 59);
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.setFontSize(16);
-                    pdf.text('SOCK COLLECTION', pageWidth / 2, 16, { align: 'center' });
-
-                    let y = 24;
-                    for (const group of pages[pageIndex]) {
-                        pdf.setFillColor(17, 17, 17);
-                        pdf.rect(margin, y, contentWidth, brandBarHeight, 'F');
-                        pdf.setTextColor(255, 255, 255);
-                        pdf.setFont('helvetica', 'bold');
-                        pdf.setFontSize(8.5);
-                        pdf.text(group.brandName.toLocaleUpperCase(), margin + 3, y + 4.9);
-
-                        const gridTop = y + brandBarHeight + 1;
-                        const rowCount = Math.ceil(group.socks.length / columns);
-                        for (let row = 0; row < rowCount; row++) {
-                            const rowSocks = group.socks.slice(row * columns, (row + 1) * columns);
-                            const rowTop = gridTop + row * (tileHeight + rowGap);
-
-                            for (let column = 0; column < rowSocks.length; column++) {
-                                const sock = rowSocks[column];
-                                const tileX = margin + column * (tileWidth + tileGap);
-                                const imageBoxX = tileX + 0.5;
-                                const imageBoxY = rowTop + 0.5;
-                                const imageBoxWidth = tileWidth - 1;
-                                const imageBoxHeight = imageHeight;
-
-                                pdf.setFillColor(248, 250, 252);
-                                pdf.rect(imageBoxX, imageBoxY, imageBoxWidth, imageBoxHeight, 'F');
-
-                                let pdfImage = imageCache.get(sock.image);
-                                if (!pdfImage) {
-                                    pdfImage = await loadPDFImage(sock.image);
-                                    imageCache.set(sock.image, pdfImage);
-                                }
-                                const imageScale = Math.min(
-                                    (imageBoxWidth - 1) / pdfImage.width,
-                                    (imageBoxHeight - 1) / pdfImage.height
-                                );
-                                const imageWidth = pdfImage.width * imageScale;
-                                const imageDrawHeight = pdfImage.height * imageScale;
-                                pdf.addImage(
-                                    pdfImage.data,
-                                    'JPEG',
-                                    imageBoxX + (imageBoxWidth - imageWidth) / 2,
-                                    imageBoxY + (imageBoxHeight - imageDrawHeight) / 2,
-                                    imageWidth,
-                                    imageDrawHeight,
-                                    undefined,
-                                    'FAST'
-                                );
-
-                                pdf.setTextColor(30, 41, 59);
-                                pdf.setFont('helvetica', 'bold');
-                                pdf.setFontSize(6.5);
-                                pdf.text(`Price: ${Number(sock.price).toFixed(2)}`, tileX + tileWidth / 2, rowTop + 17.3, { align: 'center' });
-
-                                pdf.setFont('helvetica', 'normal');
-                                pdf.setFontSize(5.5);
-                                const descriptionLines = getPDFDescriptionLines(pdf, sock.description, tileWidth - 1.2);
-                                if (descriptionLines.length > 0) {
-                                    pdf.text(descriptionLines, tileX + tileWidth / 2, rowTop + 19.6, {
-                                        align: 'center',
-                                        lineHeightFactor: 1.2
-                                    });
-                                }
-                            }
-                        }
-
-                        y = gridTop + rowCount * tileHeight + (rowCount - 1) * rowGap + 1.5;
-                    }
-
-                    pdf.setDrawColor(209, 213, 219);
-                    pdf.line(margin, 287, pageWidth - margin, 287);
-                    pdf.setTextColor(100, 116, 139);
-                    pdf.setFont('helvetica', 'normal');
-                    pdf.setFontSize(7);
-                    pdf.text(`Aiara Marketing | Page ${pageIndex + 1} of ${pages.length}`, pageWidth / 2, 291, { align: 'center' });
-                }
-
-                pdf.save('sock-catalog.pdf');
-                showToast('Catalog PDF downloaded.');
-            } catch (error) {
-                console.error('PDF generation error:', error);
-                showToast('Could not create the PDF. Please try again.', 'error');
-            } finally {
-                button.disabled = false;
-                button.textContent = 'Convert to PDF';
-            }
-        }
+      }
     </script>
-</body>
+  </body>
 </html>
