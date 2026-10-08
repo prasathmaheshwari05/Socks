@@ -739,6 +739,7 @@
       let products = JSON.parse(localStorage.getItem("productEntries")) || [];
       let currentEditId = null;
       let catalogPages = [];
+      let selectedImageRead = Promise.resolve([]);
 
       // Initialize
       document.addEventListener("DOMContentLoaded", function () {
@@ -786,6 +787,7 @@
       // Product Functions
       function openAddProductModal() {
         currentEditId = null;
+        selectedImageRead = Promise.resolve([]);
         document.getElementById("product-brand-name").value = "";
         document.getElementById("product-images").value = "";
         document.getElementById("product-price").value = "";
@@ -808,6 +810,7 @@
         if (!product) return;
 
         currentEditId = id;
+        selectedImageRead = Promise.resolve([]);
         document.getElementById("product-brand-name").value = product.brandName;
         document.getElementById("product-images").value = "";
         document.getElementById("product-price").value = product.price;
@@ -829,24 +832,32 @@
 
       function previewProductImages(event) {
         const files = Array.from(event.target.files);
+        selectedImageRead = Promise.resolve([]);
         if (files.length > 0) {
-          const reader = new FileReader();
           const previews = files.map(
             (file) =>
               new Promise((resolve, reject) => {
                 const imageReader = new FileReader();
-                imageReader.onload = () =>
-                  resolve(
-                    `<img src="${imageReader.result}" class="product-image" alt="${escapeHTML(file.name)}">`,
-                  );
+                imageReader.onload = () => resolve(imageReader.result);
                 imageReader.onerror = () => reject(imageReader.error);
                 imageReader.readAsDataURL(file);
               }),
           );
-          Promise.all(previews).then((images) => {
-            document.getElementById("product-images-preview").innerHTML =
-              images.join("");
-          });
+          selectedImageRead = Promise.all(previews)
+            .then((images) => {
+              document.getElementById("product-images-preview").innerHTML =
+                images
+                  .map(
+                    (image, index) =>
+                      `<img src="${image}" class="product-image" alt="${escapeHTML(files[index].name)}">`,
+                  )
+                  .join("");
+              return images;
+            })
+            .catch(() => {
+              showToast("Could not read the selected images.", "error");
+              return null;
+            });
         }
       }
 
@@ -894,17 +905,14 @@
         }
 
         try {
-          const newImages = await Promise.all(
-            imageFiles.map(
-              (file) =>
-                new Promise((resolve, reject) => {
-                  const reader = new FileReader();
-                  reader.onload = () => resolve(reader.result);
-                  reader.onerror = () => reject(reader.error);
-                  reader.readAsDataURL(file);
-                }),
-            ),
-          );
+          const newImages = await selectedImageRead;
+          if (
+            imageFiles.length > 0 &&
+            (!newImages || newImages.length !== imageFiles.length)
+          ) {
+            showToast("Could not read the selected images.", "error");
+            return;
+          }
           const product = {
             id: currentEditId || Date.now(),
             brandName: brandName,
@@ -930,7 +938,12 @@
               : "Product saved successfully!",
           );
         } catch (error) {
-          showToast("Could not read the selected images.", "error");
+          showToast(
+            error.name === "QuotaExceededError"
+              ? "Not enough browser storage. Remove products or use smaller images."
+              : "Could not save the product. Please try again.",
+            "error",
+          );
         }
       }
 
